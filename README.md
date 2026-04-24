@@ -1,5 +1,7 @@
 # shinybrain
 
+[![R-CMD-check](https://github.com/PrigasG/shinybrain/actions/workflows/R-CMD-check.yaml/badge.svg?branch=master)](https://github.com/PrigasG/shinybrain/actions/workflows/R-CMD-check.yaml)
+
 `shinybrain` statically analyzes Shiny applications without running them. It parses app source code, identifies reactive contexts and helper functions, resolves references across sourced files, and builds a portable "App Brain" that can be exported as structured JSON, Markdown, or an HTML dependency report.
 
 ## What it gives you
