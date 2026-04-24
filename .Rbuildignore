@@ -1,0 +1,13 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.Rhistory$
+^CLAUDE\.md$
+^shinybrain_build\.md$
+^pain-point\.md$
+^tests/\{testthat,fixtures$
+^tests/\{testthat,fixtures/.*
+^R/(brain|graph|io|ir|parse|resolve|utils)$
+^R/(brain|graph|io|ir|parse|resolve|utils)/.*
+^examples$
+^examples/.*
+^LICENSE\.md$
