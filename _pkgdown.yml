@@ -1,0 +1,113 @@
+template:
+  bootstrap: 5
+
+url: https://prigasg.github.io/shinybrain/
+
+home:
+  title: shinybrain
+  description: Static analysis and App Brain export for Shiny applications
+
+authors:
+  sidebar:
+    roles: [aut, cre]
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [github]
+  components:
+    intro:
+      text: Get Started
+      href: articles/shinybrain-getting-started.html
+    articles:
+      text: Articles
+      menu:
+      - text: Getting Started
+        href: articles/shinybrain-getting-started.html
+      - text: Workflows and Examples
+        href: articles/shinybrain-workflows.html
+    news:
+      text: News
+      href: news/index.html
+    github:
+      icon: fab fa-github
+      href: https://github.com/PrigasG/shinybrain
+      aria-label: GitHub repository
+
+reference:
+- title: Analyze Shiny code
+  contents:
+  - analyze_shiny_file
+  - analyze_shiny_project
+  - detect_entry_point
+  - resolve_source_chain
+  - extract_source_calls
+  - parse_file
+
+- title: Build and inspect the App Brain
+  contents:
+  - brain_options
+  - build_brain
+  - print_brain_console
+  - summarize_analysis
+  - generate_insights
+  - compute_complexity
+
+- title: Export outputs
+  contents:
+  - export_brain_json
+  - export_brain_markdown
+  - export_brain_html
+
+- title: Data structures and validation
+  contents:
+  - starts_with("new_sb_")
+  - validate_ir
+  - validate_graph
+
+- title: Supporting topics
+  contents:
+  - as_flag_list
+  - brain_builder
+  - brain_export
+  - brain_report
+  - build_edges
+  - build_nodes
+  - build_symbols
+  - compute_usage_weights
+  - CONFIDENCE_LEVELS
+  - CONTEXT_TYPES
+  - EDGE_TYPES
+  - extract_contexts
+  - extract_references
+  - extract_snippet
+  - graph_layer
+  - insights_layer
+  - io
+  - ir_constructors
+  - ISSUE_TYPES
+  - load_file
+  - lookup_symbol
+  - make_id
+  - make_issue
+  - null_coalesce
+  - parse_layer
+  - parse_raw
+  - phase_b
+  - REFERENCE_TYPES
+  - resolve_layer
+  - resolve_references
+  - scan_top_level
+  - SEVERITY_LEVELS
+  - shinybrain-package
+  - shinybrain_analysis
+  - SYMBOL_TYPES
+  - UNRESOLVED_TYPES
+  - utils
+
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - shinybrain-getting-started
+  - shinybrain-workflows

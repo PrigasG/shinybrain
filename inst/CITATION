@@ -1,0 +1,8 @@
+bibentry(
+  bibtype = "Manual",
+  title = "shinybrain: Static Analysis and App Brain Export for Shiny Applications",
+  author = person("ShinyBrain", "Authors"),
+  year = "2026",
+  note = "R package version 0.1.0",
+  url = "https://github.com/PrigasG/shinybrain"
+)

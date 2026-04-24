@@ -109,8 +109,7 @@ html_path <- file.path(out_dir, "basic_brain.html")
 
 export_brain_json(basic_out$brain,     file = json_path)
 export_brain_markdown(basic_out$brain, file = md_path)
-export_brain_html(basic_out$brain,     file = html_path,
-                  title = "Basic App Brain")
+export_brain_html(basic_out$brain, file = html_path)
 
 cat("\nExported artifacts:\n")
 cat("  JSON: ", json_path, "\n")

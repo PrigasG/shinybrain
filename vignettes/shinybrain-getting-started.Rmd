@@ -1,0 +1,86 @@
+---
+title: "Getting Started with shinybrain"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with shinybrain}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`shinybrain` statically analyzes Shiny application source code and turns it into a portable "App Brain" object. This vignette walks through the smallest useful workflow.
+
+## Analyze a project
+
+```{r}
+library(shinybrain)
+
+app_dir <- system.file("examples", "basic_app", package = "shinybrain")
+if (app_dir == "") app_dir <- file.path("inst", "examples", "basic_app")
+if (!dir.exists(app_dir)) app_dir <- file.path("examples", "basic_app")
+
+result <- analyze_shiny_project(app_dir)
+names(result)
+```
+
+The analysis result contains project metadata plus the internal tibbles used by the parser and graph builder:
+
+- `project`
+- `files`
+- `contexts`
+- `symbols`
+- `references`
+- `nodes`
+- `edges`
+- `issues`
+
+## Build an App Brain
+
+```{r}
+brain <- build_brain(result)
+brain$summary
+```
+
+The App Brain is the package's portable reporting object. It includes:
+
+- project metadata
+- file inventory
+- graph nodes and edges
+- generated insights
+- issue records
+- export options
+
+## Print a console summary
+
+```{r}
+print_brain_console(brain)
+```
+
+## Export for downstream use
+
+```r
+export_brain_json(brain, "brain.json")
+export_brain_markdown(brain, "brain.md")
+export_brain_html(brain, "brain.html", open = FALSE)
+```
+
+## Single-file apps
+
+If you already know the app entry file, use `analyze_shiny_file()`:
+
+```{r}
+single_file <- file.path(app_dir, "app.R")
+
+single_result <- analyze_shiny_file(single_file)
+nrow(single_result$contexts)
+```
+
+## Next steps
+
+See `vignette("shinybrain-workflows")` for a tour of the included example apps and typical analysis workflows.

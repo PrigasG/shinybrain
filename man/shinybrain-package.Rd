@@ -9,6 +9,15 @@
 Parses Shiny app source and builds a reactive-graph "brain" describing
 contexts, symbols, references, nodes, and edges.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/PrigasG/shinybrain}
+  \item \url{https://prigasg.github.io/shinybrain/}
+  \item Report bugs at \url{https://github.com/PrigasG/shinybrain/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: ShinyBrain Authors \email{prigasgenthian48@gmail.com}
 

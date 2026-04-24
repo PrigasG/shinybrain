@@ -4,3 +4,9 @@
 .httr-oauth
 .DS_Store
 .quarto
+*.tar.gz
+*.Rcheck/
+..Rcheck/
+CLAUDE.md
+pain-point.md
+shinybrain_build.md

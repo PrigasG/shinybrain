@@ -1,0 +1,96 @@
+---
+title: "Workflows and Included Examples"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Workflows and Included Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This package ships with concrete example apps and fixtures that exercise the analysis pipeline.
+
+## Example apps
+
+### `examples/basic_app`
+
+This is the happy-path example. It includes:
+
+- `reactive()`
+- `eventReactive()`
+- `observeEvent()`
+- `observe()`
+- `reactiveVal()`
+- `reactiveValues()`
+- `renderText()`
+- `renderTable()`
+- `renderPlot()`
+- sourced helper functions
+- side-effect calls such as `write.csv()` and `message()`
+
+```{r}
+library(shinybrain)
+
+basic_app <- system.file("examples", "basic_app", package = "shinybrain")
+if (basic_app == "") basic_app <- file.path("inst", "examples", "basic_app")
+if (!dir.exists(basic_app)) basic_app <- file.path("examples", "basic_app")
+
+basic_result <- analyze_shiny_project(basic_app)
+table(basic_result$contexts$context_type)
+```
+
+### `examples/edge_case_app`
+
+This app is designed for analyzer edge cases rather than runtime execution. It includes:
+
+- a resolved `source("helpers.R")`
+- a missing source target
+- a dynamic `source()` call
+- a dynamic `input[[...]]` lookup
+
+```{r}
+edge_app <- system.file("examples", "edge_case_app", package = "shinybrain")
+if (edge_app == "") edge_app <- file.path("inst", "examples", "edge_case_app")
+if (!dir.exists(edge_app)) edge_app <- file.path("examples", "edge_case_app")
+
+edge_result <- analyze_shiny_project(edge_app)
+edge_result$issues[, c("severity", "issue_type")]
+```
+
+## Fixture-level workflows
+
+The `tests/fixtures/` directory contains small focused projects for regression testing:
+
+- `basic_single_file`
+- `observer_and_state`
+- `source_chain`
+
+These are useful when you want compact reproducible inputs while working on the parser or graph builder.
+
+## Export workflow
+
+Once you have a `brain` object, the usual downstream workflow is:
+
+```r
+brain <- build_brain(basic_result)
+
+export_brain_json(brain, "brain.json")
+export_brain_markdown(brain, "brain.md")
+export_brain_html(brain, "brain.html", open = FALSE)
+```
+
+## Smoke-test runner
+
+The repository includes a convenience runner:
+
+```r
+source("examples/run_example.R")
+```
+
+It analyzes the bundled example apps, prints summaries, and writes export artifacts to a temporary directory.

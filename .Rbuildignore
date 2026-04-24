@@ -11,3 +11,14 @@
 ^examples$
 ^examples/.*
 ^LICENSE\.md$
+^README\.Rmd$
+^cran-comments\.md$
+^docs$
+^docs/.*
+^pkgdown$
+^pkgdown/.*
+^shinybrain\.Rcheck$
+^shinybrain\.Rcheck/.*
+^\.\.Rcheck$
+^\.\.Rcheck/.*
+^shinybrain_.*\.tar\.gz$
