@@ -18,7 +18,7 @@ This package ships with concrete example apps and fixtures that exercise the ana
 
 ## Example apps
 
-### `examples/basic_app`
+### `inst/examples/basic_app`
 
 This is the happy-path example. It includes:
 
@@ -38,14 +38,14 @@ This is the happy-path example. It includes:
 library(shinybrain)
 
 basic_app <- system.file("examples", "basic_app", package = "shinybrain")
-if (basic_app == "") basic_app <- file.path("inst", "examples", "basic_app")
-if (!dir.exists(basic_app)) basic_app <- file.path("examples", "basic_app")
+if (basic_app == "") basic_app <- file.path("..", "inst", "examples", "basic_app")
+if (!dir.exists(basic_app)) basic_app <- file.path("inst", "examples", "basic_app")
 
 basic_result <- analyze_shiny_project(basic_app)
 table(basic_result$contexts$context_type)
 ```
 
-### `examples/edge_case_app`
+### `inst/examples/edge_case_app`
 
 This app is designed for analyzer edge cases rather than runtime execution. It includes:
 
@@ -56,8 +56,8 @@ This app is designed for analyzer edge cases rather than runtime execution. It i
 
 ```{r}
 edge_app <- system.file("examples", "edge_case_app", package = "shinybrain")
-if (edge_app == "") edge_app <- file.path("inst", "examples", "edge_case_app")
-if (!dir.exists(edge_app)) edge_app <- file.path("examples", "edge_case_app")
+if (edge_app == "") edge_app <- file.path("..", "inst", "examples", "edge_case_app")
+if (!dir.exists(edge_app)) edge_app <- file.path("inst", "examples", "edge_case_app")
 
 edge_result <- analyze_shiny_project(edge_app)
 edge_result$issues[, c("severity", "issue_type")]

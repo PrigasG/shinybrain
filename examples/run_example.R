@@ -89,8 +89,10 @@ run_one <- function(app_dir, label, verbose = FALSE) {
 
 here <- .resolve_examples_dir()
 
-basic_app     <- file.path(here, "basic_app")
-edge_case_app <- file.path(here, "edge_case_app")
+basic_app     <- normalizePath(file.path(here, "..", "inst", "examples", "basic_app"),
+                               mustWork = FALSE)
+edge_case_app <- normalizePath(file.path(here, "..", "inst", "examples", "edge_case_app"),
+                               mustWork = FALSE)
 
 basic_out <- run_one(basic_app,     "BASIC APP (happy path)",
                      verbose = TRUE)

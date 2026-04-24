@@ -47,8 +47,8 @@ devtools::install(".")
 library(shinybrain)
 
 app_dir <- system.file("examples", "basic_app", package = "shinybrain")
-if (app_dir == "") app_dir <- file.path("inst", "examples", "basic_app")
-if (!dir.exists(app_dir)) app_dir <- file.path("examples", "basic_app")
+if (app_dir == "") app_dir <- file.path("..", "inst", "examples", "basic_app")
+if (!dir.exists(app_dir)) app_dir <- file.path("inst", "examples", "basic_app")
 
 result <- analyze_shiny_project(app_dir)
 brain  <- build_brain(result)
@@ -72,12 +72,10 @@ export_brain_html(brain, "brain.html", open = FALSE)
 
 ## Included example apps
 
-The repository ships with concrete example apps in `examples/`:
+The package ships with concrete example apps under `inst/examples/`, available after installation via `system.file("examples", ..., package = "shinybrain")`:
 
-- `examples/basic_app/`: a runnable Shiny app covering the happy path
-- `examples/edge_case_app/`: an analyzer fixture with a missing `source()` target, a dynamic `source()` call, and a dynamic `input[[...]]` access
-
-Installed copies are also available under `system.file("examples", ..., package = "shinybrain")`.
+- `basic_app/`: a runnable Shiny app covering the happy path
+- `edge_case_app/`: an analyzer fixture with a missing `source()` target, a dynamic `source()` call, and a dynamic `input[[...]]` access
 
 The test fixtures in `tests/fixtures/` also include compact examples for single-file apps, observer/state behavior, and sourced-file projects.
 

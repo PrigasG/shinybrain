@@ -5,19 +5,19 @@ the analysis pipeline.
 
 ## Example apps
 
-### `examples/basic_app`
+### `inst/examples/basic_app`
 
 This is the happy-path example. It includes:
 
-- [`reactive()`](https://rdrr.io/pkg/shiny/man/reactive.html)
-- [`eventReactive()`](https://rdrr.io/pkg/shiny/man/observeEvent.html)
-- [`observeEvent()`](https://rdrr.io/pkg/shiny/man/observeEvent.html)
-- [`observe()`](https://rdrr.io/pkg/shiny/man/observe.html)
-- [`reactiveVal()`](https://rdrr.io/pkg/shiny/man/reactiveVal.html)
-- [`reactiveValues()`](https://rdrr.io/pkg/shiny/man/reactiveValues.html)
-- [`renderText()`](https://rdrr.io/pkg/shiny/man/renderPrint.html)
-- [`renderTable()`](https://rdrr.io/pkg/shiny/man/renderTable.html)
-- [`renderPlot()`](https://rdrr.io/pkg/shiny/man/renderPlot.html)
+- `reactive()`
+- `eventReactive()`
+- `observeEvent()`
+- `observe()`
+- `reactiveVal()`
+- `reactiveValues()`
+- `renderText()`
+- `renderTable()`
+- `renderPlot()`
 - sourced helper functions
 - side-effect calls such as
   [`write.csv()`](https://rdrr.io/r/utils/write.table.html) and
@@ -28,15 +28,19 @@ This is the happy-path example. It includes:
 library(shinybrain)
 
 basic_app <- system.file("examples", "basic_app", package = "shinybrain")
-if (basic_app == "") basic_app <- file.path("inst", "examples", "basic_app")
-if (!dir.exists(basic_app)) basic_app <- file.path("examples", "basic_app")
+if (basic_app == "") basic_app <- file.path("..", "inst", "examples", "basic_app")
+if (!dir.exists(basic_app)) basic_app <- file.path("inst", "examples", "basic_app")
 
 basic_result <- analyze_shiny_project(basic_app)
 table(basic_result$contexts$context_type)
-#> < table of extent 0 >
+#> 
+#> event_reactive      helper_fn  observe_event       observer  output_render 
+#>              1              2              2              1              3 
+#>       reactive      state_val   state_values 
+#>              2              1              1
 ```
 
-### `examples/edge_case_app`
+### `inst/examples/edge_case_app`
 
 This app is designed for analyzer edge cases rather than runtime
 execution. It includes:
@@ -49,15 +53,16 @@ execution. It includes:
 ``` r
 
 edge_app <- system.file("examples", "edge_case_app", package = "shinybrain")
-if (edge_app == "") edge_app <- file.path("inst", "examples", "edge_case_app")
-if (!dir.exists(edge_app)) edge_app <- file.path("examples", "edge_case_app")
+if (edge_app == "") edge_app <- file.path("..", "inst", "examples", "edge_case_app")
+if (!dir.exists(edge_app)) edge_app <- file.path("inst", "examples", "edge_case_app")
 
 edge_result <- analyze_shiny_project(edge_app)
 edge_result$issues[, c("severity", "issue_type")]
-#> # A tibble: 1 × 2
-#>   severity issue_type  
-#>   <chr>    <chr>       
-#> 1 error    missing_file
+#> # A tibble: 2 × 2
+#>   severity issue_type         
+#>   <chr>    <chr>              
+#> 1 warning  missing_file       
+#> 2 warning  unsupported_pattern
 ```
 
 ## Fixture-level workflows

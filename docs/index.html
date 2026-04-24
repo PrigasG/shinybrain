@@ -51,9 +51,24 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><div class="section level1">
+  <main id="main" class="col-md-9"><ul>
+<li>
+<a href="#shinybrain">shinybrain</a>
+<ul>
+<li><a href="#what-it-gives-you">What it gives you</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#quick-start">Quick start</a></li>
+<li><a href="#included-example-apps">Included example apps</a></li>
+<li><a href="#main-workflow">Main workflow</a></li>
+<li><a href="#articles">Articles</a></li>
+<li><a href="#development-status">Development status</a></li>
+</ul>
+</li>
+</ul>
+<div class="section level1">
 <div class="page-header"><h1 id="shinybrain">shinybrain<a class="anchor" aria-label="anchor" href="#shinybrain"></a>
 </h1></div>
+<p><a href="https://github.com/PrigasG/shinybrain/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/PrigasG/shinybrain/actions/workflows/R-CMD-check.yaml/badge.svg?branch=master" alt="R-CMD-check"></a></p>
 <p><code>shinybrain</code> statically analyzes Shiny applications without running them. It parses app source code, identifies reactive contexts and helper functions, resolves references across sourced files, and builds a portable “App Brain” that can be exported as structured JSON, Markdown, or an HTML dependency report.</p>
 <div class="section level2">
 <h2 id="what-it-gives-you">What it gives you<a class="anchor" aria-label="anchor" href="#what-it-gives-you"></a>
@@ -83,16 +98,145 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">shinybrain</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">app_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_app"</span>, package <span class="op">=</span> <span class="st">"shinybrain"</span><span class="op">)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="va">app_dir</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="va">app_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"basic_app"</span><span class="op">)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">app_dir</span><span class="op">)</span><span class="op">)</span> <span class="va">app_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_app"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">app_dir</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="va">app_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">".."</span>, <span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"basic_app"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">app_dir</span><span class="op">)</span><span class="op">)</span> <span class="va">app_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"basic_app"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/analyze_shiny_project.html">analyze_shiny_project</a></span><span class="op">(</span><span class="va">app_dir</span><span class="op">)</span></span>
 <span><span class="va">brain</span>  <span class="op">&lt;-</span> <span class="fu"><a href="reference/build_brain.html">build_brain</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">brain</span><span class="op">$</span><span class="va">summary</span></span></code></pre></div>
+<span><span class="va">brain</span><span class="op">$</span><span class="va">summary</span></span>
+<span><span class="co">#&gt; $n_files</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_contexts</span></span>
+<span><span class="co">#&gt; [1] 13</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_nodes</span></span>
+<span><span class="co">#&gt; [1] 18</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_edges</span></span>
+<span><span class="co">#&gt; [1] 13</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_symbols</span></span>
+<span><span class="co">#&gt; [1] 18</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_unresolved</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_issues</span></span>
+<span><span class="co">#&gt; [1] 4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_insights</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $max_chain_depth</span></span>
+<span><span class="co">#&gt; [1] 5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $complexity</span></span>
+<span><span class="co">#&gt; $complexity$score</span></span>
+<span><span class="co">#&gt; [1] 50</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $complexity$label</span></span>
+<span><span class="co">#&gt; [1] "Moderate"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $node_breakdown</span></span>
+<span><span class="co">#&gt; $node_breakdown$helper_fn</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $node_breakdown$input</span></span>
+<span><span class="co">#&gt; [1] 5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $node_breakdown$observer</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $node_breakdown$output</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $node_breakdown$reactive</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $node_breakdown$state</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $edge_breakdown</span></span>
+<span><span class="co">#&gt; $edge_breakdown$calls</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $edge_breakdown$depends_on</span></span>
+<span><span class="co">#&gt; [1] 4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $edge_breakdown$feeds_into</span></span>
+<span><span class="co">#&gt; [1] 5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $edge_breakdown$reads_state</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $edge_breakdown$writes_state</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
 <p>You can inspect the graph in the console:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/print_brain_console.html">print_brain_console</a></span><span class="op">(</span><span class="va">brain</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/print_brain_console.html">print_brain_console</a></span><span class="op">(</span><span class="va">brain</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ============================================================ </span></span>
+<span><span class="co">#&gt;   ShinyBrain Report   basic_app </span></span>
+<span><span class="co">#&gt;   shinybrain  0.1.0    2026-04-24 00:43  UTC</span></span>
+<span><span class="co">#&gt; ============================================================ </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Complexity: Moderate ( 50 / 100 ) [██████████░░░░░░░░░░] </span></span>
+<span><span class="co">#&gt;   Chain depth: 5  ⚠  deep pipeline </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   At a Glance </span></span>
+<span><span class="co">#&gt;   ----------- </span></span>
+<span><span class="co">#&gt;   Files         : 2 </span></span>
+<span><span class="co">#&gt;   Contexts      : 13 </span></span>
+<span><span class="co">#&gt;   Nodes         : 18 </span></span>
+<span><span class="co">#&gt;   Edges         : 13 </span></span>
+<span><span class="co">#&gt;   Unresolved    : 0 </span></span>
+<span><span class="co">#&gt;   Node types    : helper_fn × 2   input × 5   observer × 3   output × 3   reactive × 3   state × 2  </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Files </span></span>
+<span><span class="co">#&gt;   ----- </span></span>
+<span><span class="co">#&gt;   ✓ app.R ( entry , 88 lines )</span></span>
+<span><span class="co">#&gt;   ✓ helpers.R ( sourced , 32 lines )</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Reactive Graph </span></span>
+<span><span class="co">#&gt;   -------------- </span></span>
+<span><span class="co">#&gt;   [ state ]</span></span>
+<span><span class="co">#&gt;     • saved   → used by 1  </span></span>
+<span><span class="co">#&gt;     • counters   </span></span>
+<span><span class="co">#&gt;   [ reactive ]</span></span>
+<span><span class="co">#&gt;     • dataset   → used by 1  </span></span>
+<span><span class="co">#&gt;     • filtered   → used by 2  </span></span>
+<span><span class="co">#&gt;     • summary_data   → used by 2  </span></span>
+<span><span class="co">#&gt;   [ output ]</span></span>
+<span><span class="co">#&gt;     • output$status   → used by 1  </span></span>
+<span><span class="co">#&gt;     • output$preview   → used by 1  </span></span>
+<span><span class="co">#&gt;     • output$chart   → used by 1  </span></span>
+<span><span class="co">#&gt;   [ observer ]</span></span>
+<span><span class="co">#&gt;     • observeEvent_46   → used by 2  </span></span>
+<span><span class="co">#&gt;     • observeEvent_54   </span></span>
+<span><span class="co">#&gt;     • observe_60   </span></span>
+<span><span class="co">#&gt;   [ helper_fn ]</span></span>
+<span><span class="co">#&gt;     • filter_by_threshold   → used by 1  </span></span>
+<span><span class="co">#&gt;     • summarize_numeric   → used by 1  </span></span>
+<span><span class="co">#&gt;   [ input ]</span></span>
+<span><span class="co">#&gt;     • input$dataset   </span></span>
+<span><span class="co">#&gt;     • input$cutoff   </span></span>
+<span><span class="co">#&gt;     • input$go_btn   </span></span>
+<span><span class="co">#&gt;     • input$save_btn   </span></span>
+<span><span class="co">#&gt;     • input$reset_btn   </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Insights </span></span>
+<span><span class="co">#&gt;   -------- </span></span>
+<span><span class="co">#&gt;   ⚠️  [WARNING] 'write.csv()' inside 'observeEvent_46' is a side effect</span></span>
+<span><span class="co">#&gt;      not wrapped in isolate(); it will re-run on every reactive</span></span>
+<span><span class="co">#&gt;      invalidation cycle. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ============================================================ </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Run shinybrain_report(..., format = "html") for the interactive report.</span></span></code></pre></div>
 <p>And export it for downstream use:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/export_brain_json.html">export_brain_json</a></span><span class="op">(</span><span class="va">brain</span>, <span class="st">"brain.json"</span><span class="op">)</span></span>
@@ -102,14 +246,13 @@
 <div class="section level2">
 <h2 id="included-example-apps">Included example apps<a class="anchor" aria-label="anchor" href="#included-example-apps"></a>
 </h2>
-<p>The repository ships with concrete example apps in <code>examples/</code>:</p>
+<p>The package ships with concrete example apps under <code>inst/examples/</code>, available after installation via <code>system.file("examples", ..., package = "shinybrain")</code>:</p>
 <ul>
 <li>
-<code>examples/basic_app/</code>: a runnable Shiny app covering the happy path</li>
+<code>basic_app/</code>: a runnable Shiny app covering the happy path</li>
 <li>
-<code>examples/edge_case_app/</code>: an analyzer fixture with a missing <code><a href="https://rdrr.io/r/base/source.html" class="external-link">source()</a></code> target, a dynamic <code><a href="https://rdrr.io/r/base/source.html" class="external-link">source()</a></code> call, and a dynamic <code>input[[...]]</code> access</li>
+<code>edge_case_app/</code>: an analyzer fixture with a missing <code><a href="https://rdrr.io/r/base/source.html" class="external-link">source()</a></code> target, a dynamic <code><a href="https://rdrr.io/r/base/source.html" class="external-link">source()</a></code> call, and a dynamic <code>input[[...]]</code> access</li>
 </ul>
-<p>Installed copies are also available under <code>system.file("examples", ..., package = "shinybrain")</code>.</p>
 <p>The test fixtures in <code>tests/fixtures/</code> also include compact examples for single-file apps, observer/state behavior, and sourced-file projects.</p>
 </div>
 <div class="section level2">
@@ -144,9 +287,11 @@
 <p>The package is set up as an R package with tests, examples, vignettes, and pkgdown configuration. It is intended for static analysis and reporting workflows rather than runtime Shiny instrumentation.</p>
 </div>
 </div>
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://github.com/PrigasG/shinybrain" class="external-link">View on GitHub</a></li>
 <li><a href="https://github.com/PrigasG/shinybrain/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/PrigasG/shinybrain/issues" class="external-link">Report a bug</a></li>
 </ul>

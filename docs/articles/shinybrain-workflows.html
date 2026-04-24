@@ -70,20 +70,20 @@ exercise the analysis pipeline.</p>
 <h2 id="example-apps">Example apps<a class="anchor" aria-label="anchor" href="#example-apps"></a>
 </h2>
 <div class="section level3">
-<h3 id="examplesbasic_app">
-<code>examples/basic_app</code><a class="anchor" aria-label="anchor" href="#examplesbasic_app"></a>
+<h3 id="instexamplesbasic_app">
+<code>inst/examples/basic_app</code><a class="anchor" aria-label="anchor" href="#instexamplesbasic_app"></a>
 </h3>
 <p>This is the happy-path example. It includes:</p>
 <ul>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive()</a></code></li>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">eventReactive()</a></code></li>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent()</a></code></li>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe()</a></code></li>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/reactiveVal.html" class="external-link">reactiveVal()</a></code></li>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">reactiveValues()</a></code></li>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html" class="external-link">renderText()</a></code></li>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/renderTable.html" class="external-link">renderTable()</a></code></li>
-<li><code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code></li>
+<li><code>reactive()</code></li>
+<li><code>eventReactive()</code></li>
+<li><code>observeEvent()</code></li>
+<li><code>observe()</code></li>
+<li><code>reactiveVal()</code></li>
+<li><code>reactiveValues()</code></li>
+<li><code>renderText()</code></li>
+<li><code>renderTable()</code></li>
+<li><code>renderPlot()</code></li>
 <li>sourced helper functions</li>
 <li>side-effect calls such as <code><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv()</a></code> and
 <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>
@@ -93,16 +93,20 @@ exercise the analysis pipeline.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">shinybrain</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">basic_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_app"</span>, package <span class="op">=</span> <span class="st">"shinybrain"</span><span class="op">)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="va">basic_app</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="va">basic_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"basic_app"</span><span class="op">)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">basic_app</span><span class="op">)</span><span class="op">)</span> <span class="va">basic_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_app"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">basic_app</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="va">basic_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">".."</span>, <span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"basic_app"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">basic_app</span><span class="op">)</span><span class="op">)</span> <span class="va">basic_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"basic_app"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">basic_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyze_shiny_project.html">analyze_shiny_project</a></span><span class="op">(</span><span class="va">basic_app</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">basic_result</span><span class="op">$</span><span class="va">contexts</span><span class="op">$</span><span class="va">context_type</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt; table of extent 0 &gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; event_reactive      helper_fn  observe_event       observer  output_render </span></span>
+<span><span class="co">#&gt;              1              2              2              1              3 </span></span>
+<span><span class="co">#&gt;       reactive      state_val   state_values </span></span>
+<span><span class="co">#&gt;              2              1              1</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="examplesedge_case_app">
-<code>examples/edge_case_app</code><a class="anchor" aria-label="anchor" href="#examplesedge_case_app"></a>
+<h3 id="instexamplesedge_case_app">
+<code>inst/examples/edge_case_app</code><a class="anchor" aria-label="anchor" href="#instexamplesedge_case_app"></a>
 </h3>
 <p>This app is designed for analyzer edge cases rather than runtime
 execution. It includes:</p>
@@ -115,15 +119,16 @@ execution. It includes:</p>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">edge_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"edge_case_app"</span>, package <span class="op">=</span> <span class="st">"shinybrain"</span><span class="op">)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="va">edge_app</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="va">edge_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"edge_case_app"</span><span class="op">)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">edge_app</span><span class="op">)</span><span class="op">)</span> <span class="va">edge_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"edge_case_app"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">edge_app</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="va">edge_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">".."</span>, <span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"edge_case_app"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">edge_app</span><span class="op">)</span><span class="op">)</span> <span class="va">edge_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"edge_case_app"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">edge_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyze_shiny_project.html">analyze_shiny_project</a></span><span class="op">(</span><span class="va">edge_app</span><span class="op">)</span></span>
 <span><span class="va">edge_result</span><span class="op">$</span><span class="va">issues</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"severity"</span>, <span class="st">"issue_type"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 2</span></span></span>
-<span><span class="co">#&gt;   severity issue_type  </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> error    missing_file</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
+<span><span class="co">#&gt;   severity issue_type         </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> warning  missing_file       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> warning  unsupported_pattern</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

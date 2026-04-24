@@ -22,8 +22,8 @@ knitr::opts_chunk$set(
 library(shinybrain)
 
 app_dir <- system.file("examples", "basic_app", package = "shinybrain")
-if (app_dir == "") app_dir <- file.path("inst", "examples", "basic_app")
-if (!dir.exists(app_dir)) app_dir <- file.path("examples", "basic_app")
+if (app_dir == "") app_dir <- file.path("..", "inst", "examples", "basic_app")
+if (!dir.exists(app_dir)) app_dir <- file.path("inst", "examples", "basic_app")
 
 result <- analyze_shiny_project(app_dir)
 names(result)

@@ -1,6 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.Rhistory$
+^\.github$
+^\.github/.*
 ^CLAUDE\.md$
 ^shinybrain_build\.md$
 ^pain-point\.md$
