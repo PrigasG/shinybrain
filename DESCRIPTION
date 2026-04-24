@@ -24,3 +24,5 @@ Suggests:
     testthat (>= 3.0.0),
     jsonlite
 Config/testthat/edition: 3
+URL: https://github.com/PrigasG/shinybrain
+BugReports: https://github.com/PrigasG/shinybrain/issues
