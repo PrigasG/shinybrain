@@ -83,7 +83,27 @@ export_brain_markdown <- function(brain, file = NULL) {
   emit("| Max dependency chain | ", s$max_chain_depth, " hops |")
   emit("| Complexity | ", s$complexity$label,
        " (", s$complexity$score, "/100) |")
+  emit("| Analysis confidence | ", s$analysis_confidence$label,
+       " (", s$analysis_confidence$score, "/100) |")
   emit("")
+
+  conf_reasons <- unlist(s$analysis_confidence$reasons)
+  if (length(conf_reasons) > 0) {
+    emit("**Confidence notes:** ", paste(conf_reasons, collapse = " | "))
+    emit("")
+  }
+
+  if (length(s$top_findings) > 0) {
+    emit("## Prioritized Findings")
+    emit("")
+    for (finding in s$top_findings) {
+      emit("- **[", toupper(finding$severity), "]** ", finding$label,
+           " (score ", finding$score, ")")
+      emit("  - ", finding$message)
+      emit("  - Recommendation: ", finding$recommendation)
+    }
+    emit("")
+  }
 
   # Node breakdown
   if (length(s$node_breakdown) > 0) {
@@ -165,6 +185,12 @@ export_brain_markdown <- function(brain, file = NULL) {
       for (i in seq_len(nrow(rows))) {
         icon <- sev_icons[sev]
         emit(icon, " **[", toupper(sev), "]** ", rows$message[i])
+        if ("recommendation" %in% names(rows) &&
+            !is.na(rows$recommendation[i]) &&
+            nzchar(rows$recommendation[i])) {
+          emit("")
+          emit("Recommendation: ", rows$recommendation[i])
+        }
         emit("")
       }
     }
@@ -235,8 +261,14 @@ export_brain_markdown <- function(brain, file = NULL) {
   insights_list <- if (nrow(brain$insights) > 0) {
     lapply(seq_len(nrow(brain$insights)), function(i) {
       r <- brain$insights[i, ]
-      list(category = r$category, severity = r$severity,
-           label = r$label, message = r$message)
+      list(
+        category = r$category,
+        severity = r$severity,
+        label = r$label,
+        message = r$message,
+        recommendation = r$recommendation,
+        score = r$score
+      )
     })
   } else list()
 
@@ -256,6 +288,6 @@ export_brain_markdown <- function(brain, file = NULL) {
 
 .brain_version <- function(brain) {
   v <- tryCatch(brain$project$shinybrain_version[[1]], error = function(e) NULL)
-  if (is.null(v) || length(v) == 0) "0.1.0" else v[1]
+  if (is.null(v) || length(v) == 0) "0.2.0" else v[1]
 }
 

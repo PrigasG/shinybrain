@@ -1,6 +1,6 @@
 Package: shinybrain
 Title: Static Analysis and App Brain Export for Shiny Applications
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("ShinyBrain", "Authors", role = c("aut", "cre"),
            email = "prigasgenthian48@gmail.com")

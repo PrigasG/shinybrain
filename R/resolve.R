@@ -50,7 +50,7 @@ build_symbols <- function(contexts, references, file_id, project_id) {
       symbol_type    = sym_type,
       line_start     = ctx$line_start,
       line_end       = ctx$line_end,
-      module_id      = NA_character_,
+      module_id      = ctx$module_id,
       usage_count    = 0L,
       confidence     = ctx$confidence
     )

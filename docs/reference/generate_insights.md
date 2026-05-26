@@ -32,4 +32,5 @@ generate_insights(nodes, edges, references, contexts, issues)
 
 ## Value
 
-Tibble with columns: category, severity, label, message
+Tibble with columns: category, severity, label, message, recommendation,
+score

@@ -18,6 +18,10 @@ functions, resolves references across sourced files, and builds a
 portable “App Brain” that can be exported as structured JSON, Markdown,
 or an HTML dependency report.
 
+Version `0.2.0` adds prioritized architecture findings,
+analysis-confidence scoring, and early module-pattern support for legacy
+multi-file apps.
+
 ## What it gives you
 
 - A project-level parse of Shiny code without launching the app
@@ -133,7 +137,7 @@ print_brain_console(brain)
 #> 
 #> ============================================================ 
 #>   ShinyBrain Report   basic_app 
-#>   shinybrain  0.1.0    2026-04-24 00:43  UTC
+#>   shinybrain  0.1.0    2026-05-26 02:49  UTC
 #> ============================================================ 
 #> 
 #>   Complexity: Moderate ( 50 / 100 ) [██████████░░░░░░░░░░] 
@@ -208,6 +212,14 @@ available after installation via
 - `basic_app/`: a runnable Shiny app covering the happy path
 - `edge_case_app/`: an analyzer fixture with a missing `source()`
   target, a dynamic `source()` call, and a dynamic `input[[...]]` access
+- `v2_hotspot_app/`: a concentrated dependency graph for hotspot
+  detection
+- `v2_dead_reactive_app/`: an intentionally unused reactive for cleanup
+  guidance
+- `v2_side_effect_app/`: side effects inside a reactive to exercise
+  recommendations
+- `v2_legacy_app/`: a multi-file legacy workflow with modules, dynamic
+  UI, and incomplete wiring
 
 The test fixtures in `tests/fixtures/` also include compact examples for
 single-file apps, observer/state behavior, and sourced-file projects.

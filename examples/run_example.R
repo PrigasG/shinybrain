@@ -1,4 +1,4 @@
-# Smoke test: runs shinybrain on the two example apps and prints a summary.
+# Smoke test: runs shinybrain on the packaged example apps and prints a summary.
 # Run from the package root:
 #   Rscript examples/run_example.R
 # Or, from within an R session with the package loaded:
@@ -93,25 +93,41 @@ basic_app     <- normalizePath(file.path(here, "..", "inst", "examples", "basic_
                                mustWork = FALSE)
 edge_case_app <- normalizePath(file.path(here, "..", "inst", "examples", "edge_case_app"),
                                mustWork = FALSE)
+hotspot_app   <- normalizePath(file.path(here, "..", "inst", "examples", "v2_hotspot_app"),
+                               mustWork = FALSE)
+dead_app      <- normalizePath(file.path(here, "..", "inst", "examples", "v2_dead_reactive_app"),
+                               mustWork = FALSE)
+sidefx_app    <- normalizePath(file.path(here, "..", "inst", "examples", "v2_side_effect_app"),
+                               mustWork = FALSE)
+legacy_app    <- normalizePath(file.path(here, "..", "inst", "examples", "v2_legacy_app"),
+                               mustWork = FALSE)
 
 basic_out <- run_one(basic_app,     "BASIC APP (happy path)",
                      verbose = TRUE)
 edge_out  <- run_one(edge_case_app, "EDGE-CASE APP (missing + dynamic source)",
                      verbose = FALSE)
+hotspot_out <- run_one(hotspot_app, "V2 HOTSPOT APP (shared dependency concentration)",
+                       verbose = FALSE)
+dead_out <- run_one(dead_app, "V2 DEAD REACTIVE APP (unused computation)",
+                    verbose = FALSE)
+sidefx_out <- run_one(sidefx_app, "V2 SIDE-EFFECT APP (unguarded side effects)",
+                      verbose = FALSE)
+legacy_out <- run_one(legacy_app, "V2 LEGACY APP (modules + dynamic UI + wiring gaps)",
+                      verbose = FALSE)
 
 cat("\n================================================================\n")
-cat("  Export artifacts for the basic app\n")
+cat("  Export artifacts for the hotspot app\n")
 cat("================================================================\n")
 out_dir <- file.path(tempdir(), "shinybrain_example")
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
-json_path <- file.path(out_dir, "basic_brain.json")
-md_path   <- file.path(out_dir, "basic_brain.md")
-html_path <- file.path(out_dir, "basic_brain.html")
+json_path <- file.path(out_dir, "hotspot_brain.json")
+md_path   <- file.path(out_dir, "hotspot_brain.md")
+html_path <- file.path(out_dir, "hotspot_brain.html")
 
-export_brain_json(basic_out$brain,     file = json_path)
-export_brain_markdown(basic_out$brain, file = md_path)
-export_brain_html(basic_out$brain, file = html_path)
+export_brain_json(hotspot_out$brain,     file = json_path)
+export_brain_markdown(hotspot_out$brain, file = md_path)
+export_brain_html(hotspot_out$brain, file = html_path)
 
 cat("\nExported artifacts:\n")
 cat("  JSON: ", json_path, "\n")

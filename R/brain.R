@@ -83,6 +83,7 @@ build_brain <- function(result, options = brain_options()) {
   insights   <- generate_insights(nodes, edges, refs, contexts, issues)
   complexity <- compute_complexity(nodes, edges, insights)
   depth      <- .max_chain_depth(nodes, edges)
+  analysis_confidence <- .analysis_confidence(refs, issues)
 
   # Node type breakdown
   node_breakdown <- if (nrow(nodes) > 0) {
@@ -107,6 +108,8 @@ build_brain <- function(result, options = brain_options()) {
     n_insights     = nrow(insights),
     max_chain_depth = depth,
     complexity     = complexity,
+    analysis_confidence = analysis_confidence,
+    top_findings   = .top_findings(insights),
     node_breakdown = node_breakdown,
     edge_breakdown = edge_breakdown
   )
@@ -120,6 +123,80 @@ build_brain <- function(result, options = brain_options()) {
     insights = insights,
     issues   = issues,
     options  = options
+  )
+}
+
+.top_findings <- function(insights, n = 5L) {
+  if (is.null(insights) || nrow(insights) == 0) return(list())
+
+  take <- seq_len(min(n, nrow(insights)))
+  lapply(take, function(i) {
+    row <- insights[i, ]
+    list(
+      category = row$category[[1]],
+      severity = row$severity[[1]],
+      label = row$label[[1]],
+      message = row$message[[1]],
+      recommendation = row$recommendation[[1]],
+      score = row$score[[1]]
+    )
+  })
+}
+
+.analysis_confidence <- function(references, issues) {
+  low_refs <- if (nrow(references) > 0) sum(references$confidence == "low", na.rm = TRUE) else 0L
+  medium_refs <- if (nrow(references) > 0) sum(references$confidence == "medium", na.rm = TRUE) else 0L
+  dynamic_refs <- if (nrow(references) > 0) sum(references$is_dynamic, na.rm = TRUE) else 0L
+
+  unsupported <- if (nrow(issues) > 0) {
+    sum(issues$issue_type %in% c("unsupported_pattern", "module_link_incomplete"),
+        na.rm = TRUE)
+  } else 0L
+  hard_parse <- if (nrow(issues) > 0) {
+    sum(issues$issue_type %in% c("parse_failure", "missing_file") &
+          issues$severity == "error", na.rm = TRUE)
+  } else 0L
+
+  score <- 100L
+  score <- score - min(40L, hard_parse * 25L)
+  score <- score - min(30L, unsupported * 10L)
+  score <- score - min(20L, low_refs * 5L)
+  score <- score - min(10L, medium_refs * 2L)
+  score <- max(0L, as.integer(score))
+
+  label <- if (score >= 85L) {
+    "High"
+  } else if (score >= 65L) {
+    "Moderate"
+  } else {
+    "Low"
+  }
+
+  reasons <- character()
+  if (hard_parse > 0) {
+    reasons <- c(reasons, paste0(hard_parse, " parse or missing-file error(s)"))
+  }
+  if (unsupported > 0) {
+    reasons <- c(reasons, paste0(unsupported, " partial-support pattern(s)"))
+  }
+  if (dynamic_refs > 0) {
+    reasons <- c(reasons, paste0(dynamic_refs, " dynamic reference(s)"))
+  }
+  if (low_refs > 0) {
+    reasons <- c(reasons, paste0(low_refs, " low-confidence reference(s)"))
+  }
+  if (medium_refs > 0) {
+    reasons <- c(reasons, paste0(medium_refs, " medium-confidence reference(s)"))
+  }
+
+  list(
+    score = score,
+    label = label,
+    low_references = as.integer(low_refs),
+    medium_references = as.integer(medium_refs),
+    dynamic_references = as.integer(dynamic_refs),
+    partial_patterns = as.integer(unsupported),
+    reasons = as.list(reasons)
   )
 }
 

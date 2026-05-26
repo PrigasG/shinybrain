@@ -5,7 +5,7 @@ Sys.setenv(R_USER_CACHE_DIR = normalizePath(cache_dir, winslash = "/", mustWork 
 
 ignored_md <- c(
   "README.md", "LICENSE.md", "LICENCE.md", "NEWS.md", "cran-comments.md",
-  "CLAUDE.md", "pain-point.md", "shinybrain_build.md"
+  "CLAUDE.md", "pain-point.md", "shinybrain_build.md", "AGENTS.md"
 )
 
 assignInNamespace(

@@ -65,6 +65,31 @@ edge_result$issues[, c("severity", "issue_type")]
 #> 2 warning  unsupported_pattern
 ```
 
+### `inst/examples/v2_legacy_app`
+
+This larger example is meant to pressure-test the architecture review
+surface. It includes:
+
+- multi-file sourced helpers
+- module-shaped helper functions
+- incomplete module wiring
+- `renderUI()` for runtime-generated UI
+- dead reactive work
+- side effects in an observer
+
+``` r
+
+legacy_app <- system.file("examples", "v2_legacy_app", package = "shinybrain")
+if (legacy_app == "") legacy_app <- file.path("..", "inst", "examples", "v2_legacy_app")
+if (!dir.exists(legacy_app)) legacy_app <- file.path("inst", "examples", "v2_legacy_app")
+
+legacy_brain <- build_brain(analyze_shiny_project(legacy_app))
+legacy_brain$summary$analysis_confidence
+#> NULL
+legacy_brain$summary$top_findings
+#> NULL
+```
+
 ## Fixture-level workflows
 
 The `tests/fixtures/` directory contains small focused projects for

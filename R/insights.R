@@ -18,20 +18,53 @@ NULL
 #' @param references sb_reference tibble (resolved)
 #' @param contexts sb_context tibble
 #' @param issues sb_issue tibble
-#' @return Tibble with columns: category, severity, label, message
+#' @return Tibble with columns: category, severity, label, message,
+#'   recommendation, score
 #' @export
 generate_insights <- function(nodes, edges, references, contexts, issues) {
   found <- list()
+  incoming_counts <- if (nrow(edges) > 0) table(edges$to_node_id) else integer()
+  outgoing_counts <- if (nrow(edges) > 0) table(edges$from_node_id) else integer()
 
   # 1. Dead reactives: reactive/event_reactive with no consumers
   reactive_nodes <- nodes[nodes$node_type == "reactive", ]
-  dead_r <- reactive_nodes[reactive_nodes$usage_count == 0, ]
+  reactive_usage <- vapply(reactive_nodes$node_id, .edge_count, 0L, counts = outgoing_counts)
+  dead_r <- reactive_nodes[reactive_usage == 0L, ]
   for (i in seq_len(nrow(dead_r))) {
     found[[length(found) + 1]] <- .insight(
       "dead_reactive", "warning", dead_r$label[i],
       paste0(
         "'", dead_r$label[i], "' is computed but never consumed by any ",
         "output or other reactive; it will never invalidate after startup."
+      ),
+      recommendation = paste0(
+        "Remove '", dead_r$label[i],
+        "' if it is obsolete, or connect it to an output or downstream reactive ",
+        "if it is meant to participate in the app flow."
+      )
+    )
+  }
+
+  # 1b. Reactive hotspots: heavily reused reactive/state nodes become
+  # architectural chokepoints.
+  hotspot_nodes <- nodes[
+    nodes$node_type %in% c("reactive", "state") &
+      vapply(nodes$node_id, .edge_count, 0L, counts = outgoing_counts) >= 3L,
+  ]
+  for (i in seq_len(nrow(hotspot_nodes))) {
+    downstream_count <- .edge_count(hotspot_nodes$node_id[i], outgoing_counts)
+    noun <- if (hotspot_nodes$node_type[i] == "state") "state object" else "reactive"
+    found[[length(found) + 1]] <- .insight(
+      "reactive_hotspot", "warning", hotspot_nodes$label[i],
+      paste0(
+        "The ", noun, " '", hotspot_nodes$label[i], "' feeds ",
+        downstream_count,
+        " downstream nodes, making it a likely maintenance and invalidation hotspot."
+      ),
+      recommendation = paste0(
+        "Review whether '", hotspot_nodes$label[i],
+        "' should be split into smaller responsibilities, cached, or wrapped ",
+        "behind helper reactives with narrower consumers."
       )
     )
   }
@@ -56,6 +89,11 @@ generate_insights <- function(nodes, edges, references, contexts, issues) {
             "'", fn_refs$target_text[i], "()' inside '", ctx_label,
             "' is a side effect not wrapped in isolate(); it will re-run ",
             "on every reactive invalidation cycle."
+          ),
+          recommendation = paste0(
+            "Check whether '", fn_refs$target_text[i],
+            "()' belongs in an observer, behind an explicit event trigger, ",
+            "or inside isolate() to avoid accidental repeated execution."
           )
         )
       }
@@ -64,14 +102,20 @@ generate_insights <- function(nodes, edges, references, contexts, issues) {
 
   # 3. High fan-out helpers: helpers called by 3+ contexts
   helper_nodes <- nodes[nodes$node_type == "helper_fn" &
-                          nodes$usage_count >= 3, ]
+                          vapply(nodes$node_id, .edge_count, 0L, counts = incoming_counts) >= 3L, ]
   for (i in seq_len(nrow(helper_nodes))) {
+    helper_usage <- .edge_count(helper_nodes$node_id[i], incoming_counts)
     found[[length(found) + 1]] <- .insight(
       "high_fan_out", "info", helper_nodes$label[i],
       paste0(
         "Helper '", helper_nodes$label[i], "' is called by ",
-        helper_nodes$usage_count[i],
+        helper_usage,
         " contexts; changes to this function will propagate widely."
+      ),
+      recommendation = paste0(
+        "Keep '", helper_nodes$label[i],
+        "' small and stable, and consider extracting sub-helpers if it is ",
+        "accumulating multiple responsibilities."
       )
     )
   }
@@ -80,16 +124,19 @@ generate_insights <- function(nodes, edges, references, contexts, issues) {
   if (nrow(edges) > 0) {
     output_nodes <- nodes[nodes$node_type == "output", ]
     if (nrow(output_nodes) > 0) {
-      incoming_counts <- table(edges$to_node_id)
       for (i in seq_len(nrow(output_nodes))) {
-        n <- as.integer(incoming_counts[output_nodes$node_id[i]])
-        if (!is.na(n) && n >= 4) {
+        n <- .edge_count(output_nodes$node_id[i], incoming_counts)
+        if (n >= 4L) {
           found[[length(found) + 1]] <- .insight(
             "complex_output", "info", output_nodes$label[i],
             paste0(
               "'", output_nodes$label[i], "' depends on ", n,
               " upstream nodes; consider caching expensive upstream ",
               "reactives with reactive() to avoid redundant re-computation."
+            ),
+            recommendation = paste0(
+              "Inspect the dependency chain for '", output_nodes$label[i],
+              "' and move expensive or repeated work into dedicated upstream reactives."
             )
           )
         }
@@ -109,7 +156,8 @@ generate_insights <- function(nodes, edges, references, contexts, issues) {
           nrow(iso_nodes), " context(s) use isolate() to break reactive ",
           "dependencies (", paste(iso_nodes$label, collapse = ", "),
           "). Verify these reads are intentionally non-reactive."
-        )
+        ),
+        recommendation = "Review each isolate() block to make sure the non-reactive read is intentional and documented."
       )
     }
   }
@@ -122,7 +170,8 @@ generate_insights <- function(nodes, edges, references, contexts, issues) {
     found[[length(found) + 1]] <- .insight(
       "parse_error", "error",
       if (!is.na(hard$file_id[i])) basename(hard$file_id[i]) else "project",
-      hard$message[i]
+      hard$message[i],
+      recommendation = "Fix the missing or unparseable file first; downstream analysis is less reliable until the source tree is complete."
     )
   }
 
@@ -131,16 +180,22 @@ generate_insights <- function(nodes, edges, references, contexts, issues) {
       category = character(),
       severity = character(),
       label    = character(),
-      message  = character()
+      message  = character(),
+      recommendation = character(),
+      score = integer()
     ))
   }
 
-  tibble::tibble(
+  insights <- tibble::tibble(
     category = vapply(found, `[[`, "", "category"),
     severity = vapply(found, `[[`, "", "severity"),
     label    = vapply(found, `[[`, "", "label"),
-    message  = vapply(found, `[[`, "", "message")
+    message  = vapply(found, `[[`, "", "message"),
+    recommendation = vapply(found, `[[`, "", "recommendation"),
+    score = vapply(found, `[[`, 0L, "score")
   )
+
+  insights[order(-insights$score, insights$label), , drop = FALSE]
 }
 
 # ---- Complexity scoring -----------------------------------------------------
@@ -223,9 +278,16 @@ dplyr_free_cut <- function(x, breaks, labels) {
 
 # ---- Helpers ----------------------------------------------------------------
 
-.insight <- function(category, severity, label, message) {
-  list(category = category, severity = severity,
-       label = label, message = message)
+.insight <- function(category, severity, label, message, recommendation = NULL) {
+  recommendation <- recommendation %||% .default_recommendation(category, label)
+  list(
+    category = category,
+    severity = severity,
+    label = label,
+    message = message,
+    recommendation = recommendation,
+    score = .insight_score(category, severity)
+  )
 }
 
 .label_for_context <- function(context_id, nodes) {
@@ -233,4 +295,47 @@ dplyr_free_cut <- function(x, breaks, labels) {
   hit <- nodes$label[!is.na(nodes$context_id) &
                        nodes$context_id == context_id]
   if (length(hit) > 0) hit[1] else "unknown"
+}
+
+.edge_count <- function(node_id, counts) {
+  n <- unname(counts[as.character(node_id)])
+  if (length(n) == 0L || is.na(n)) 0L else as.integer(n[[1]])
+}
+
+.default_recommendation <- function(category, label) {
+  switch(
+    category,
+    dead_reactive = paste0("Remove or reconnect '", label, "' so it has a clear consumer."),
+    reactive_hotspot = paste0("Split or narrow '", label, "' so fewer downstream nodes depend on it."),
+    unguarded_side_effect = paste0("Move side effects around '", label, "' behind explicit events or isolate() where appropriate."),
+    high_fan_out = paste0("Keep '", label, "' stable and consider smaller helper boundaries."),
+    complex_output = paste0("Pull shared work for '", label, "' into dedicated upstream reactives."),
+    isolate_usage = "Confirm the isolate() boundary is intentional.",
+    parse_error = "Repair the source tree before trusting deeper architecture findings.",
+    "Review this finding and decide whether it needs a structural change."
+  )
+}
+
+.insight_score <- function(category, severity) {
+  severity_base <- switch(
+    severity,
+    error = 95L,
+    warning = 70L,
+    info = 40L,
+    30L
+  )
+
+  category_bonus <- switch(
+    category,
+    parse_error = 5L,
+    unguarded_side_effect = 15L,
+    reactive_hotspot = 12L,
+    dead_reactive = 8L,
+    complex_output = 6L,
+    high_fan_out = 4L,
+    isolate_usage = 0L,
+    0L
+  )
+
+  as.integer(severity_base + category_bonus)
 }

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">shinybrain</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -130,6 +130,32 @@ execution. It includes:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> warning  missing_file       </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> warning  unsupported_pattern</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="instexamplesv2_legacy_app">
+<code>inst/examples/v2_legacy_app</code><a class="anchor" aria-label="anchor" href="#instexamplesv2_legacy_app"></a>
+</h3>
+<p>This larger example is meant to pressure-test the architecture review
+surface. It includes:</p>
+<ul>
+<li>multi-file sourced helpers</li>
+<li>module-shaped helper functions</li>
+<li>incomplete module wiring</li>
+<li>
+<code>renderUI()</code> for runtime-generated UI</li>
+<li>dead reactive work</li>
+<li>side effects in an observer</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">legacy_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"v2_legacy_app"</span>, package <span class="op">=</span> <span class="st">"shinybrain"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">legacy_app</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="va">legacy_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">".."</span>, <span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"v2_legacy_app"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">legacy_app</span><span class="op">)</span><span class="op">)</span> <span class="va">legacy_app</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"inst"</span>, <span class="st">"examples"</span>, <span class="st">"v2_legacy_app"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">legacy_brain</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/build_brain.html">build_brain</a></span><span class="op">(</span><span class="fu"><a href="../reference/analyze_shiny_project.html">analyze_shiny_project</a></span><span class="op">(</span><span class="va">legacy_app</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">legacy_brain</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">analysis_confidence</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="va">legacy_brain</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">top_findings</span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="fixture-level-workflows">Fixture-level workflows<a class="anchor" aria-label="anchor" href="#fixture-level-workflows"></a>
@@ -149,7 +175,7 @@ working on the parser or graph builder.</p>
 </h2>
 <p>Once you have a <code>brain</code> object, the usual downstream
 workflow is:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">brain</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/build_brain.html">build_brain</a></span><span class="op">(</span><span class="va">basic_result</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/export_brain_json.html">export_brain_json</a></span><span class="op">(</span><span class="va">brain</span>, <span class="st">"brain.json"</span><span class="op">)</span></span>
@@ -160,7 +186,7 @@ workflow is:</p>
 <h2 id="smoke-test-runner">Smoke-test runner<a class="anchor" aria-label="anchor" href="#smoke-test-runner"></a>
 </h2>
 <p>The repository includes a convenience runner:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"examples/run_example.R"</span><span class="op">)</span></span></code></pre></div>
 <p>It analyzes the bundled example apps, prints summaries, and writes
 export artifacts to a temporary directory.</p>

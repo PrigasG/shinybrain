@@ -279,6 +279,17 @@ extract_contexts <- function(parse_data, code, file_id, project_id) {
   ctx_type <- .map_call_to_context(rhs_call, is_output)
   if (is.null(ctx_type)) return(NULL)
 
+  ctx_confidence <- if (is_output && identical(rhs_call, "renderUI")) {
+    "medium"
+  } else {
+    "high"
+  }
+  ctx_flags <- if (is_output && identical(rhs_call, "renderUI")) {
+    "runtime_generated_ui"
+  } else {
+    character()
+  }
+
   .make_context_row(
     context_type = ctx_type,
     label        = lhs_name,
@@ -286,7 +297,9 @@ extract_contexts <- function(parse_data, code, file_id, project_id) {
     project_id   = project_id,
     line_start   = a$line_start,
     line_end     = a$line_end,
-    lines        = lines
+    lines        = lines,
+    confidence   = ctx_confidence,
+    flags        = ctx_flags
   )
 }
 
@@ -378,7 +391,10 @@ extract_contexts <- function(parse_data, code, file_id, project_id) {
 
 # Build a single context row
 .make_context_row <- function(context_type, label, file_id, project_id,
-                               line_start, line_end, lines) {
+                               line_start, line_end, lines,
+                               confidence = "high",
+                               module_id = NA_character_,
+                               flags = character()) {
   snippet <- .extract_lines(lines, line_start, line_end, max_lines = 20)
   context_id <- make_id(file_id, context_type, label,
                          as.character(line_start), as.character(line_end),
@@ -393,11 +409,11 @@ extract_contexts <- function(parse_data, code, file_id, project_id) {
     line_start        = as.integer(line_start),
     line_end          = as.integer(line_end),
     parent_context_id = NA_character_,
-    module_id         = NA_character_,
+    module_id         = as.character(module_id),
     snippet           = snippet,
     contains_isolate  = FALSE,   # updated in pass 4
-    confidence        = "high",
-    flags             = list(character())
+    confidence        = confidence,
+    flags             = as_flag_list(flags)
   )
 }
 
@@ -766,6 +782,12 @@ parse_file <- function(file_row) {
     file_id    = file_row$file_id,
     project_id = file_row$project_id
   )
+  contexts <- .annotate_module_contexts(contexts, pd, file_row$file_id)
+  all_issues <- rbind(
+    all_issues,
+    .module_analysis_issues(contexts, pd, file_row$file_id, file_row$project_id),
+    .dynamic_ui_issues(contexts, file_row$file_id, file_row$project_id)
+  )
 
   # Pass 4
   references <- new_sb_reference()
@@ -835,4 +857,232 @@ parse_file <- function(file_row) {
     flags <- c(flags, "possible_side_effect")
   }
   flags
+}
+
+# ---- Module pattern detection -----------------------------------------
+
+.module_definitions <- function(contexts, pd, file_id) {
+  helper_ctx <- contexts[contexts$context_type == "helper_fn", , drop = FALSE]
+  if (nrow(helper_ctx) == 0) {
+    return(tibble::tibble(
+      module_name = character(),
+      label = character(),
+      kind = character(),
+      context_id = character(),
+      line_start = integer(),
+      line_end = integer(),
+      module_id = character()
+    ))
+  }
+
+  defs <- list()
+  for (i in seq_len(nrow(helper_ctx))) {
+    ctx <- helper_ctx[i, ]
+    calls_in_range <- pd[
+      pd$token == "SYMBOL_FUNCTION_CALL" &
+        pd$line1 >= ctx$line_start &
+        pd$line2 <= ctx$line_end,
+      ,
+      drop = FALSE
+    ]
+
+    kind <- NULL
+    module_name <- NULL
+    if (grepl("Server$", ctx$label) && any(calls_in_range$text == "moduleServer")) {
+      kind <- "server"
+      module_name <- sub("Server$", "", ctx$label)
+    } else if (grepl("UI$", ctx$label) && any(calls_in_range$text == "NS")) {
+      kind <- "ui"
+      module_name <- sub("UI$", "", ctx$label)
+    }
+
+    if (is.null(kind) || !nzchar(module_name)) next
+
+    defs[[length(defs) + 1]] <- tibble::tibble(
+      module_name = module_name,
+      label = ctx$label,
+      kind = kind,
+      context_id = ctx$context_id,
+      line_start = ctx$line_start,
+      line_end = ctx$line_end,
+      module_id = make_id(file_id, "module", module_name, prefix = "mod")
+    )
+  }
+
+  if (length(defs) == 0) {
+    return(tibble::tibble(
+      module_name = character(),
+      label = character(),
+      kind = character(),
+      context_id = character(),
+      line_start = integer(),
+      line_end = integer(),
+      module_id = character()
+    ))
+  }
+  do.call(rbind, defs)
+}
+
+.annotate_module_contexts <- function(contexts, pd, file_id) {
+  if (nrow(contexts) == 0) return(contexts)
+  defs <- .module_definitions(contexts, pd, file_id)
+  if (nrow(defs) == 0) return(contexts)
+
+  for (i in seq_len(nrow(defs))) {
+    def <- defs[i, ]
+    contexts$module_id[contexts$context_id == def$context_id] <- def$module_id
+
+    nested <- contexts$context_id != def$context_id &
+      contexts$line_start >= def$line_start &
+      contexts$line_end <= def$line_end
+
+    contexts$module_id[nested & is.na(contexts$module_id)] <- def$module_id
+  }
+
+  contexts
+}
+
+.module_analysis_issues <- function(contexts, pd, file_id, project_id) {
+  defs <- .module_definitions(contexts, pd, file_id)
+  issues <- new_sb_issue()
+  if (nrow(defs) == 0) return(issues)
+
+  module_names <- unique(defs$module_name)
+  for (module_name in module_names) {
+    module_defs <- defs[defs$module_name == module_name, , drop = FALSE]
+    has_ui <- any(module_defs$kind == "ui")
+    has_server <- any(module_defs$kind == "server")
+
+    if (has_server && !has_ui) {
+      line_n <- module_defs$line_start[module_defs$kind == "server"][1]
+      issues <- rbind(issues, make_issue(
+        project_id = project_id,
+        severity = "warning",
+        issue_type = "module_link_incomplete",
+        message = paste0(
+          "Module '", module_name, "' has a server helper but no matching UI helper. ",
+          "Expected a companion helper such as '", module_name, "UI()' to pair with '",
+          module_name, "Server()'."
+        ),
+        file_id = file_id,
+        line_start = line_n
+      ))
+    }
+
+    if (has_ui && !has_server) {
+      line_n <- module_defs$line_start[module_defs$kind == "ui"][1]
+      issues <- rbind(issues, make_issue(
+        project_id = project_id,
+        severity = "warning",
+        issue_type = "module_link_incomplete",
+        message = paste0(
+          "Module '", module_name, "' has a UI helper but no matching server helper. ",
+          "Expected a companion helper such as '", module_name, "Server()' to pair with '",
+          module_name, "UI()'."
+        ),
+        file_id = file_id,
+        line_start = line_n
+      ))
+    }
+  }
+
+  call_issues <- .module_invocation_issues(defs, pd, file_id, project_id)
+  rbind(issues, call_issues)
+}
+
+.module_invocation_issues <- function(defs, pd, file_id, project_id) {
+  issues <- new_sb_issue()
+  server_defs <- defs[defs$kind == "server", , drop = FALSE]
+  if (nrow(server_defs) == 0) return(issues)
+
+  invocation_labels <- .module_invocations(pd)
+  for (i in seq_len(nrow(server_defs))) {
+    def <- server_defs[i, ]
+    if (!(def$label %in% invocation_labels)) {
+      issues <- rbind(issues, make_issue(
+        project_id = project_id,
+        severity = "info",
+        issue_type = "module_link_incomplete",
+        message = paste0(
+          "Module server helper '", def$label, "()' was defined but no invocation was detected ",
+          "in this file. That can be fine for a reusable module library, but app-level wiring may be incomplete."
+        ),
+        file_id = file_id,
+        line_start = def$line_start
+      ))
+    }
+  }
+
+  known_labels <- unique(server_defs$label)
+  old_style <- .call_module_targets(pd)
+  if (length(old_style) > 0) {
+    unknown_targets <- setdiff(old_style, known_labels)
+    for (target in unknown_targets) {
+      issues <- rbind(issues, make_issue(
+        project_id = project_id,
+        severity = "warning",
+        issue_type = "module_link_incomplete",
+        message = paste0(
+          "callModule() references '", target, "()' but no matching module server helper was found in this file. ",
+          "The module wiring may be incomplete or defined in an unparsed location."
+        ),
+        file_id = file_id
+      ))
+    }
+  }
+
+  issues
+}
+
+.module_invocations <- function(pd) {
+  direct <- pd[pd$token == "SYMBOL_FUNCTION_CALL" & grepl("Server$", pd$text), "text", drop = TRUE]
+  unique(c(as.character(direct), .call_module_targets(pd)))
+}
+
+.call_module_targets <- function(pd) {
+  rows <- pd[pd$token == "SYMBOL_FUNCTION_CALL" & pd$text == "callModule", , drop = FALSE]
+  if (nrow(rows) == 0) return(character())
+
+  targets <- character()
+  for (i in seq_len(nrow(rows))) {
+    call_expr <- .walk_up_to_call_expr(rows$id[i], pd)
+    if (is.null(call_expr)) next
+    desc <- .descendants(call_expr$id, pd, max_depth = 3)
+    symbols <- desc[
+      desc$token %in% c("SYMBOL", "SYMBOL_FUNCTION_CALL") &
+        desc$text != "callModule",
+      "text",
+      drop = TRUE
+    ]
+    if (length(symbols) > 0) {
+      targets <- c(targets, as.character(symbols[1]))
+    }
+  }
+
+  unique(targets)
+}
+
+.dynamic_ui_issues <- function(contexts, file_id, project_id) {
+  issues <- new_sb_issue()
+  if (nrow(contexts) == 0) return(issues)
+
+  for (i in seq_len(nrow(contexts))) {
+    flags <- contexts$flags[[i]] %||% character()
+    if (!("runtime_generated_ui" %in% flags)) next
+    issues <- rbind(issues, make_issue(
+      project_id = project_id,
+      severity = "info",
+      issue_type = "unsupported_pattern",
+      message = paste0(
+        "'", contexts$label[i], "' uses renderUI(), so parts of the UI are generated at runtime. ",
+        "shinybrain can analyze the containing context, but downstream UI structure and dependencies are only partially known."
+      ),
+      file_id = file_id,
+      context_id = contexts$context_id[i],
+      line_start = contexts$line_start[i],
+      line_end = contexts$line_end[i]
+    ))
+  }
+
+  issues
 }

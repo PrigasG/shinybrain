@@ -27,7 +27,7 @@ analyze_shiny_file <- function(path) {
     parse_order        = list(path),
     shinybrain_version = tryCatch(
       as.character(utils::packageVersion("shinybrain")),
-      error = function(e) "0.1.0"
+      error = function(e) "0.2.0"
     ),
     created_at         = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   )

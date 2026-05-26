@@ -439,7 +439,7 @@ analyze_shiny_project <- function(path) {
     parse_order        = list(ordered_paths),
     shinybrain_version = tryCatch(
       as.character(utils::packageVersion("shinybrain")),
-      error = function(e) "0.1.0"
+      error = function(e) "0.2.0"
     ),
     created_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   )
@@ -475,7 +475,7 @@ analyze_shiny_project <- function(path) {
     entry_point_type   = entry_type,
     entry_files        = list(character()),
     parse_order        = list(character()),
-    shinybrain_version = "0.1.0",
+    shinybrain_version = "0.2.0",
     created_at         = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   )
 }

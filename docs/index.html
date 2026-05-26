@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">shinybrain</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,6 +70,7 @@
 </h1></div>
 <p><a href="https://github.com/PrigasG/shinybrain/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/PrigasG/shinybrain/actions/workflows/R-CMD-check.yaml/badge.svg?branch=master" alt="R-CMD-check"></a></p>
 <p><code>shinybrain</code> statically analyzes Shiny applications without running them. It parses app source code, identifies reactive contexts and helper functions, resolves references across sourced files, and builds a portable “App Brain” that can be exported as structured JSON, Markdown, or an HTML dependency report.</p>
+<p>Version <code>0.2.0</code> adds prioritized architecture findings, analysis-confidence scoring, and early module-pattern support for legacy multi-file apps.</p>
 <div class="section level2">
 <h2 id="what-it-gives-you">What it gives you<a class="anchor" aria-label="anchor" href="#what-it-gives-you"></a>
 </h2>
@@ -181,7 +182,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ============================================================ </span></span>
 <span><span class="co">#&gt;   ShinyBrain Report   basic_app </span></span>
-<span><span class="co">#&gt;   shinybrain  0.1.0    2026-04-24 00:43  UTC</span></span>
+<span><span class="co">#&gt;   shinybrain  0.1.0    2026-05-26 02:49  UTC</span></span>
 <span><span class="co">#&gt; ============================================================ </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Complexity: Moderate ( 50 / 100 ) [██████████░░░░░░░░░░] </span></span>
@@ -252,6 +253,14 @@
 <code>basic_app/</code>: a runnable Shiny app covering the happy path</li>
 <li>
 <code>edge_case_app/</code>: an analyzer fixture with a missing <code><a href="https://rdrr.io/r/base/source.html" class="external-link">source()</a></code> target, a dynamic <code><a href="https://rdrr.io/r/base/source.html" class="external-link">source()</a></code> call, and a dynamic <code>input[[...]]</code> access</li>
+<li>
+<code>v2_hotspot_app/</code>: a concentrated dependency graph for hotspot detection</li>
+<li>
+<code>v2_dead_reactive_app/</code>: an intentionally unused reactive for cleanup guidance</li>
+<li>
+<code>v2_side_effect_app/</code>: side effects inside a reactive to exercise recommendations</li>
+<li>
+<code>v2_legacy_app/</code>: a multi-file legacy workflow with modules, dynamic UI, and incomplete wiring</li>
 </ul>
 <p>The test fixtures in <code>tests/fixtures/</code> also include compact examples for single-file apps, observer/state behavior, and sourced-file projects.</p>
 </div>

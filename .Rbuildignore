@@ -4,6 +4,7 @@
 ^\.github$
 ^\.github/.*
 ^CLAUDE\.md$
+^AGENTS\.md$
 ^shinybrain_build\.md$
 ^pain-point\.md$
 ^tests/\{testthat,fixtures$
@@ -19,6 +20,8 @@
 ^docs/.*
 ^pkgdown$
 ^pkgdown/.*
+^dev$
+^dev/.*
 ^shinybrain\.Rcheck$
 ^shinybrain\.Rcheck/.*
 ^\.\.Rcheck$

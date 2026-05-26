@@ -18,7 +18,8 @@ generate_insights(nodes, edges, references, contexts, issues)
 \item{issues}{sb_issue tibble}
 }
 \value{
-Tibble with columns: category, severity, label, message
+Tibble with columns: category, severity, label, message,
+recommendation, score
 }
 \description{
 Generate developer-facing insights from resolved IR

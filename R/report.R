@@ -48,6 +48,12 @@ print_brain_console <- function(brain) {
   cat("\n  Complexity:", cx$label, "(", cx$score, "/ 100 )", cx_bar, "\n")
   cat("  Chain depth:", s$max_chain_depth,
       if (s$max_chain_depth > 4) " \u26a0  deep pipeline" else "", "\n")
+  cat("  Analysis confidence:", s$analysis_confidence$label, "(",
+      s$analysis_confidence$score, "/ 100 )\n")
+  conf_reasons <- unlist(s$analysis_confidence$reasons)
+  if (length(conf_reasons) > 0) {
+    cat("  Confidence notes:", paste(conf_reasons, collapse = "; "), "\n")
+  }
 
   # Stats
   .h2("At a Glance")
@@ -93,6 +99,19 @@ print_brain_console <- function(brain) {
   }
 
   # Insights
+  if (length(s$top_findings) > 0) {
+    .h2("Top Findings")
+    for (finding in s$top_findings) {
+      cat("  [", toupper(finding$severity), "] ", finding$label,
+          " (score ", finding$score, ")\n", sep = "")
+      cat("     ", .wrap(finding$message, width = 68, indent = "     "), "\n", sep = "")
+      cat("     Recommendation: ",
+          .wrap(finding$recommendation, width = 64, indent = "     "),
+          "\n", sep = "")
+    }
+  }
+
+  # Insights
   .h2("Insights")
   if (nrow(ins) == 0) {
     cat("  OK  No issues found - looking clean!\n")
@@ -107,7 +126,12 @@ print_brain_console <- function(brain) {
         # Word-wrap at 72 chars
         msg <- .wrap(paste0("[", toupper(sev), "] ", rows$message[i]),
                      width = 68, indent = "     ")
-        cat(" ", icon, msg, "\n\n")
+        rec <- if ("recommendation" %in% names(rows) &&
+                   !is.na(rows$recommendation[i]) &&
+                   nzchar(rows$recommendation[i])) {
+                 paste0("\n     Recommendation: ", rows$recommendation[i])
+               } else ""
+        cat(" ", icon, msg, rec, "\n\n")
       }
     }
   }
@@ -171,6 +195,7 @@ export_brain_html <- function(brain, file = NULL, open = TRUE) {
   version  <- .brain_version(brain)
   ts       <- format(Sys.time(), "%Y-%m-%d %H:%M UTC", tz = "UTC")
   cx       <- s$complexity
+  conf     <- s$analysis_confidence
 
   # Vis.js node/edge data
   vis_nodes <- .vis_nodes(nodes)
@@ -253,6 +278,7 @@ export_brain_html <- function(brain, file = NULL, open = TRUE) {
                    background: ', cx_color, ';
                    width: ', cx_pct, '%; transition: width .6s ease; }
   .cx-depth { font-size: 12px; color: #64748b; margin-top: 8px; }
+  .cx-confidence { font-size: 12px; color: #475569; margin-top: 10px; }
 
   /* Two-column layout */
   .two-col { display: grid; grid-template-columns: 1fr 360px; gap: 20px;
@@ -288,6 +314,8 @@ export_brain_html <- function(brain, file = NULL, open = TRUE) {
   .ic-badge.info    { background: #ede9fe; color: #5b21b6; }
   .ic-label { font-size: 12px; font-weight: 600; color: #374151; }
   .ic-msg   { font-size: 12px; color: #6b7280; line-height: 1.5; }
+  .ic-rec   { margin-top: 8px; font-size: 12px; color: #334155; }
+  .ic-score { margin-left: auto; font-size: 11px; color: #94a3b8; }
   .no-insights { padding: 40px 20px; text-align: center; color: #22c55e;
                   font-size: 14px; font-weight: 500; }
 
@@ -397,6 +425,9 @@ export_brain_html <- function(brain, file = NULL, open = TRUE) {
     </div>
     <div class="cx-depth">Longest reactive chain: ', s$max_chain_depth,
     ' hop(s) from input to output</div>
+    <div class="cx-confidence">Analysis confidence: ', conf$label, ' (', conf$score, '/100)',
+    if (length(unlist(conf$reasons)) > 0) paste0(' &nbsp;&middot;&nbsp; ', .he(paste(unlist(conf$reasons), collapse = "; "))) else '',
+    '</div>
   </div>
 
   <!-- Graph + Insights -->
@@ -646,8 +677,15 @@ function filterTable(tableId, query) {
         '<div class="ic-header">',
         '<span class="ic-badge ', sev, '">', toupper(sev), '</span>',
         '<span class="ic-label"> ', .he(rows$label[i]), '</span>',
+        '<span class="ic-score">score ', .he(rows$score[i]), '</span>',
         '</div>',
         '<div class="ic-msg">', .he(rows$message[i]), '</div>',
+        if (!is.null(rows$recommendation[i]) &&
+              !is.na(rows$recommendation[i]) &&
+              nzchar(rows$recommendation[i])) {
+          paste0('<div class="ic-rec"><strong>Recommendation:</strong> ',
+                 .he(rows$recommendation[i]), '</div>')
+        } else "",
         '</div>'
       ))
     }
